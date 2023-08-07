@@ -45,6 +45,12 @@ export const cleanSelectedConversation = (conversation: Conversation) => {
       };
     }
 
+  if (updatedConversation.temperature === null || updatedConversation.temperature === undefined) {
+    updatedConversation = {
+      ...updatedConversation,
+      temperature: DEFAULT_TEMPERATURE,
+    };
+  }
     if (!updatedConversation.temperature) {
       updatedConversation = {
         ...updatedConversation,
@@ -260,7 +266,7 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
         conversation.prompt = DEFAULT_SYSTEM_PROMPT;
       }
 
-      if (!conversation.temperature) {
+      if (conversation.temperature === null || conversation.temperature === undefined) {
         conversation.temperature = DEFAULT_TEMPERATURE;
       }
 
