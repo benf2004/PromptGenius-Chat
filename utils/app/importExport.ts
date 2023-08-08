@@ -1,3 +1,5 @@
+import Zip from 'adm-zip';
+
 import { Conversation } from '@/types/chat';
 import {
   ConversationV1,
@@ -27,6 +29,8 @@ import { FolderInterface } from '@/types/folder';
 import { Prompt } from '@/types/prompt';
 
 import { cleanConversationHistory } from './clean';
+import {useTranslation} from "next-i18next";
+import {useState, useContext} from "react";
 
 
 export function isExportFormatV1(obj: any): obj is ExportFormatV1 {
@@ -84,12 +88,77 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
 
 }
 
-function currentDate() {
-  const date = new Date();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  return `${month}-${day}`;
+function createFilename(kind: string, extension: string): string {
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+  const day = String(currentDate.getDate()).padStart(2, '0');
+  return `chatbot_ui_export_${year}${month}${day}_${kind}.${extension}`;
 }
+
+// replace common problematic filename characters
+function sanitizeFilename(filename: string): string {
+  const regex = /[\/\\:\*\?"<>\|]+/g;
+  return filename.replace(regex, '_');
+}
+
+export const exportMarkdown = () => {
+  const conversationsString = localStorage.getItem('conversationHistory');
+  const conversations: Conversation[] = conversationsString ? JSON.parse(conversationsString) as Conversation[] : [];
+  const foldersString = localStorage.getItem('folders');
+  const folders: FolderInterface[] = foldersString ? JSON.parse(foldersString) as FolderInterface[] : [];
+  const zip = new Zip();
+
+  // add folders as directories
+  if (folders) {
+    for (const folder of folders) {
+      zip.addFile(`${sanitizeFilename(folder.name)}/`, Buffer.from([]));
+    }
+  }
+
+// Filter "chat" type folders and create an object with ids as keys and names as values
+  const chatFolderNames: { [id: string]: string } = folders
+    .filter((folder) => folder.type === "chat")
+    .reduce((accumulator: { [id: string]: string }, folder) => {
+      accumulator[folder.id] = sanitizeFilename(folder.name);
+      return accumulator;
+    }, {});
+
+  // add conversations as Markdown files
+  if (conversations) {
+    for (const conversation of conversations) {
+      console.warn(conversation)
+      let markdownContent = '';
+      for (let node in conversation.mapping) {
+        const chat = conversation.mapping[node]
+        if (chat.message.role === "system") continue;
+        markdownContent += `## ${chat.message.role === "user" ? 'User' : "AI"}\n\n${chat.message.content}\n\n`;
+      }
+      const folderId = conversation.folderId ?? '';
+      const directory = folderId in chatFolderNames ? chatFolderNames[folderId] : '';
+
+      const date = new Date().toLocaleString("default", { year: "numeric", month: "long", day: "numeric" })
+      const time = new Date().toLocaleTimeString("default", {hour12: true, hour: "numeric", minute: "numeric"})
+
+      markdownContent += `---\n`
+      markdownContent += `Exported on"` + date + ` at ` + time + ".";
+
+      const filename = `${sanitizeFilename(conversation.name)}.md`
+      zip.addFile(directory + '/' + filename, Buffer.from(markdownContent));
+    }
+  }
+
+  const zipDownload = zip.toBuffer();
+  const url = URL.createObjectURL(new Blob([zipDownload]));
+  const link = document.createElement('a');
+  link.download = createFilename('markdown', 'zip')
+  link.href = url;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
 export const exportData = () => {
   let history = localStorage.getItem('conversationHistory');
@@ -120,7 +189,7 @@ export const exportData = () => {
   });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.download = `chatbot_ui_history_${currentDate()}.json`;
+  link.download = createFilename('data', 'json')
   link.href = url;
   link.style.display = 'none';
   document.body.appendChild(link);

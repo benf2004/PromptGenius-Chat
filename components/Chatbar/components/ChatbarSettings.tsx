@@ -1,4 +1,4 @@
-import { IconFileExport, IconSettings } from '@tabler/icons-react';
+import { IconMarkdown, IconFileExport, IconSettings } from '@tabler/icons-react';
 import { useContext, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
@@ -33,6 +33,7 @@ export const ChatbarSettings = () => {
     handleClearConversations,
     handleImportConversations,
     handleExportData,
+    handleExportMarkdown,
     handleApiKeyChange,
   } = useContext(ChatbarContext);
 
@@ -45,9 +46,15 @@ export const ChatbarSettings = () => {
       <Import onImport={handleImportConversations} />
 
       <SidebarButton
-        text={t('Export data')}
+        text={t('Export all - JSON')}
         icon={<IconFileExport size={18} />}
         onClick={() => handleExportData()}
+      />
+
+      <SidebarButton
+        text={t('Export all - Markdown')}
+        icon={<IconMarkdown size={18} />}
+        onClick={() => handleExportMarkdown()}
       />
 
       <SidebarButton
@@ -60,7 +67,6 @@ export const ChatbarSettings = () => {
         <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
       ) : null}
 
-      {!serverSidePluginKeysSet ? <PluginKeys /> : null}
 
       <SettingDialog
         open={isSettingDialogOpen}
