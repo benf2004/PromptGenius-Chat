@@ -594,7 +594,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </button>
                 </div>
                 {showSettings && selectedConversation && (
-                    <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
+                    <div className="mx-auto sticky top-[36px] z-10 flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
                       {models.length === 0 && (
                           <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
                             <div>
@@ -604,7 +604,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       )}
 
                       {models.length > 0 && (
-                          <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
+                          <div className="flex h-full bg-white dark:bg-[#343541]  flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                             <ModelSelect />
 
                             <SystemPrompt
