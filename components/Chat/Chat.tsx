@@ -573,21 +573,24 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </button>
 
                   <button
-                      className="ml-2 cursor-pointer hover:opacity-50"
+                      className="ml-2 cursor-pointer hover:opacity-50 disabled:hidden"
+                      disabled={currentMessageList.length === 0}
                       onClick={onScreenshot}
                   >
                     <IconScreenshot size={18} />
                   </button>
 
                   <button
-                    className="ml-2 cursor-pointer hover:opacity-50"
+                    className="ml-2 cursor-pointer hover:opacity-50 disabled:hidden"
+                    disabled={currentMessageList.length === 0}
                     onClick={onMarkdown}
                   >
                     <IconMarkdown size={18} />
                   </button>
 
                   <button
-                      className="ml-2 cursor-pointer hover:opacity-50"
+                      className="ml-2 cursor-pointer hover:opacity-50 disabled:hidden"
+                      disabled={currentMessageList.length === 0}
                       onClick={onPdf}
                   >
                     <IconPdf size={18} />
