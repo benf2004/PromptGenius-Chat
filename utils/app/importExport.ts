@@ -29,6 +29,8 @@ import { FolderInterface } from '@/types/folder';
 import { Prompt } from '@/types/prompt';
 
 import { cleanConversationHistory } from './clean';
+import {useTranslation} from "next-i18next";
+import {useState, useContext} from "react";
 
 
 export function isExportFormatV1(obj: any): obj is ExportFormatV1 {
@@ -125,12 +127,22 @@ export const exportMarkdown = () => {
   // add conversations as Markdown files
   if (conversations) {
     for (const conversation of conversations) {
+      console.warn(conversation)
       let markdownContent = '';
-      for (const message of conversation.messages) {
-	markdownContent += `## ${message.role.charAt(0).toUpperCase() + message.role.slice(1)}\n\n${message.content}\n\n`;
+      for (let node in conversation.mapping) {
+        const chat = conversation.mapping[node]
+        if (chat.message.role === "system") continue;
+        markdownContent += `## ${chat.message.role === "user" ? 'User' : "AI"}\n\n${chat.message.content}\n\n`;
       }
       const folderId = conversation.folderId ?? '';
       const directory = folderId in chatFolderNames ? chatFolderNames[folderId] : '';
+
+      const date = new Date().toLocaleString("default", { year: "numeric", month: "long", day: "numeric" })
+      const time = new Date().toLocaleTimeString("default", {hour12: true, hour: "numeric", minute: "numeric"})
+
+      markdownContent += `---\n`
+      markdownContent += `Exported on"` + date + ` at ` + time + ".";
+
       const filename = `${sanitizeFilename(conversation.name)}.md`
       zip.addFile(directory + '/' + filename, Buffer.from(markdownContent));
     }

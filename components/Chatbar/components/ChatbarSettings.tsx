@@ -46,13 +46,13 @@ export const ChatbarSettings = () => {
       <Import onImport={handleImportConversations} />
 
       <SidebarButton
-        text={t('Export data')}
+        text={t('Export all - JSON')}
         icon={<IconFileExport size={18} />}
         onClick={() => handleExportData()}
       />
 
       <SidebarButton
-        text={t('Export Markdown')}
+        text={t('Export all - Markdown')}
         icon={<IconMarkdown size={18} />}
         onClick={() => handleExportMarkdown()}
       />
@@ -67,7 +67,6 @@ export const ChatbarSettings = () => {
         <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
       ) : null}
 
-      {!serverSidePluginKeysSet ? <PluginKeys /> : null}
 
       <SettingDialog
         open={isSettingDialogOpen}
